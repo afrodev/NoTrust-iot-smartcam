@@ -1,18 +1,22 @@
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddCors( options => {
-    options.AddPolicy("NextJsPolicy", policy => {
-        policy.WithOrigins( "http://localhost:3000").AllowAnyMethod().AllowAnyHeader();
+// Add CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("NextJsPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000") // Next.js frontend
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials(); // Allow credentials if needed
     });
 });
 
 var app = builder.Build();
 
-// Call CORS functionality
+// Use CORS policy
 app.UseCors("NextJsPolicy");
 
-app.MapGet("/", () => "Hello World!");
-
-
+app.MapGet("/hello", () => Results.Json(new { message = "Hello from the .NET API!" }));
 
 app.Run();
