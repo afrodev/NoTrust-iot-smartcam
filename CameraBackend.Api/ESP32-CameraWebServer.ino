@@ -26,6 +26,10 @@ const char* password = "YOUR_WIFI_PASSWORD";
 #define HREF_GPIO_NUM     23
 #define PCLK_GPIO_NUM     22
 
+// PIR Motion Sensor
+#define PIR_PIN 13
+#define LED_PIN 4
+
 // HTTP Server and Stream handling
 httpd_handle_t stream_httpd = NULL;
 httpd_handle_t camera_httpd = NULL;
@@ -35,9 +39,14 @@ void startCameraServer();
 static esp_err_t stream_handler(httpd_req_t *req);
 void setupCamera();
 void setupWiFi();
+void handleMotionDetection();
 
 void setup() {
   Serial.begin(115200);
+  
+  // Initialize LED and PIR pins
+  pinMode(LED_PIN, OUTPUT);
+  pinMode(PIR_PIN, INPUT);
   
   setupCamera();
   setupWiFi();
@@ -45,7 +54,8 @@ void setup() {
 }
 
 void loop() {
-  delay(100); 
+  handleMotionDetection();
+  delay(100);
 }
 
 void setupCamera() {
@@ -164,13 +174,38 @@ void startCameraServer() {
   config.server_port = 80;
 
   httpd_uri_t stream_uri = {
-    .uri        = "/stream",
-    .method     = HTTP_GET,
-    .handler    = stream_handler,
+    .uri       = "/stream",
+    .method    = HTTP_GET,
+    .handler   = stream_handler,
     .user_ctx  = NULL
   };
 
   if (httpd_start(&stream_httpd, &config) == ESP_OK) {
     httpd_register_uri_handler(stream_httpd, &stream_uri);
+  }
+}
+
+void handleMotionDetection() {
+  if (digitalRead(PIR_PIN) == HIGH) {
+    digitalWrite(LED_PIN, HIGH);
+    
+    // Create HTTP client
+    WiFiClient client;
+    HTTPClient http;
+    
+    // Send motion detection to .NET backend
+    http.begin(client, "http://YOUR_BACKEND_IP:PORT/motion");
+    http.addHeader("Content-Type", "application/json");
+    
+    String payload = "{\"timestamp\":\"" + String(millis()) + "\"}";
+    int httpResponseCode = http.POST(payload);
+    
+    if (httpResponseCode > 0) {
+      Serial.println("Motion detected and notified!");
+    }
+    
+    http.end();
+    delay(1000); // Debounce
+    digitalWrite(LED_PIN, LOW);
   }
 }
