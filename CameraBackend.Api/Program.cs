@@ -19,4 +19,6 @@ app.UseCors("NextJsPolicy");
 
 app.MapGet("/hello", () => Results.Json(new { message = "Hello from the .NET API!" }));
 
+app.MapGet("/stream", () => Results.Json(new { message = "You are now viewing the security camera stream!" }));
+
 app.Run();
