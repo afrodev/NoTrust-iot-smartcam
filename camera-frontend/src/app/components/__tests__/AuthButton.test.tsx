@@ -3,11 +3,13 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import AuthButton from '../AuthButton';
 import { AuthProvider } from '../../context/AuthContext';
 
-// Add type declarations for Jest globals
+// Extend Jest matchers
 declare global {
   namespace jest {
     interface Matchers<R> {
       toBeInTheDocument(): R;
+      toHaveTextContent(text: string): R;
+      toBeDisabled(): R;
     }
   }
 }

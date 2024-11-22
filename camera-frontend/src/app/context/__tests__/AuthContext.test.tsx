@@ -1,12 +1,14 @@
 import '@testing-library/jest-dom';
-import { render, act, renderHook } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { AuthProvider, useAuth } from '../AuthContext';
 
-// Add type declarations for Jest globals
+// Extend Jest matchers
 declare global {
   namespace jest {
     interface Matchers<R> {
       toBeInTheDocument(): R;
+      toHaveTextContent(text: string): R;
+      toBeDisabled(): R;
     }
   }
 }
