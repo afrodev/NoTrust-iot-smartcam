@@ -1,5 +1,3 @@
-namespace CameraBackend.Api;
-
 using CameraBackend.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
