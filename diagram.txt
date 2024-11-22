@@ -1,0 +1,74 @@
+┌─────────────────┐      HTTP/MJPEG Stream       ┌──────────────────┐
+│   ESP32-CAM     │ ────────────────────────────>│     .NET API     │
+│ (Arduino WebSrv)│                              │   (Backend Hub)   │
+└────────┬────────┘             |─────────▶   └────────┬─────────┘
+         │                           |                    │
+         │ PIR Sensor                |           WebSocket│(Motion Events)
+         │ Readings                  |                   │
+         │                           |                   │
+         ▼                           |                    ▼
+┌─────────────────┐             |                 ┌──────────────────┐
+│Motion Detection │                  |            │    Next.js UI    │
+│    Service     │                   |           │  (Frontend App)   │
+└───────┬─────────┘             |                 └──────────────────┘
+        │							  |
+        │ Motion Events				  |
+        │ (HTTP/WebSocket)			  |	
+        └──────────────────────│
+
+Data Flow:
+──────────
+
+ESP32-CAM → .NET API:
+• Streams MJPEG video over HTTP
+• Sends PIR sensor motion detection events
+• Acts as independent web server
+• Handles camera configuration
+
+Motion Detection → .NET API:
+• Sends detected motion events
+• Updates motion state
+• Triggers notifications
+
+.NET API → Next.js:
+• Proxies camera stream
+• Broadcasts motion events via WebSocket
+• Implements CORS for secure cross-origin requests
+• Manages client connections
+
+Next.js Frontend:
+• Displays live camera feed
+• Shows real-time motion alerts
+• Provides user interface controls
+• Maintains WebSocket connection
+
+Security:
+─────────
+• CORS enabled between Next.js and .NET API
+• Local network isolation for ESP32-CAM
+• WebSocket secure connection handling
+
+Components:
+───────────
+[ESP32-CAM]
+  └── Arduino Web Server
+  └── MJPEG Streaming
+  └── PIR Sensor Integration
+  └── Motion Detection
+
+[Motion Detection Service]
+  └── PIR Sensor Processing
+  └── Event Broadcasting
+  └── .NET API Integration
+
+[.NET Backend]
+  └── Camera Stream Proxy
+  └── WebSocket Server
+  └── Motion Controller
+  └── CORS Configuration
+
+[Next.js Frontend]
+  └── Real-time Video Display
+  └── WebSocket Client
+  └── Motion Alert UI
+  └── User Controls
