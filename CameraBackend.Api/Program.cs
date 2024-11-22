@@ -1,3 +1,5 @@
+using CameraBackend.Api.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add CORS policy
@@ -11,6 +13,8 @@ builder.Services.AddCors(options =>
               .AllowCredentials(); // Allow credentials if needed
     });
 });
+
+builder.Services.AddScoped<SessionService>();
 
 var app = builder.Build();
 

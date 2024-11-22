@@ -1,0 +1,63 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./CameraBackend.Api
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.401'
+          
+      - name: Restore dependencies
+        run: |
+          cd ..
+          dotnet restore
+        
+      - name: Build
+        run: |
+          cd ..
+          dotnet build --no-restore
+        
+      - name: Test .NET
+        run: |
+          cd ..
+          dotnet test --no-build --verbosity normal
+
+  frontend-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./camera-frontend
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.18.0'
+          cache: 'npm'
+          cache-dependency-path: './camera-frontend/package-lock.json'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run linting
+        run: npm run lint
+        
+      - name: Test Next.js and React
+        run: npm test -- --passWithNoTests
+        
+      - name: Build
+        run: npm run build
