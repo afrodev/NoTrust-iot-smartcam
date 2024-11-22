@@ -186,22 +186,36 @@ void startCameraServer() {
 }
 
 void handleMotionDetection() {
-  if (digitalRead(PIR_PIN) == HIGH) {
-    digitalWrite(LED_PIN, HIGH);
+  if (di    if (!http.begin(client, "http://YOUR_BACKEND_IP:PORT/motion")) {
+      Serial.println("Error: Failed to connect to backend server");
+      digitalWrite(LED_PIN, LOW);
+      return;
+    }
     
-    // Create HTTP client
-    WiFiClient client;
-    HTTPClient http;
-    
-    // Send motion detection to .NET backend
-    http.begin(client, "http://YOUR_BACKEND_IP:PORT/motion");
     http.addHeader("Content-Type", "application/json");
-    
     String payload = "{\"timestamp\":\"" + String(millis()) + "\"}";
+    
+    // Attempt to send POST request
+    int httpResponseCode = http.POST(payload);
+    
+    if (httpResponseCode > 0) {
+      String response = http.getString();
+      Serial.printf("Motion detected! Server response code: %d\n", httpResponseCode);
+      
+      if (httpResponseCode == HTTP_CODE_OK) {
+        Serial.println("Successfully notified backend");
+      } else {
+        Serial.printf("Warning: Unexpected response code: %d\n", httpResponseCode);
+      }
+    } else {
+      Serial.printf("Error: HTTP POST failed, error: %s\n", http.errorToString(httpResponseCode).c_str());
+yload = "{\"timestamp\":\"" + String(millis()) + "\"}";
     int httpResponseCode = http.POST(payload);
     
     if (httpResponseCode > 0) {
       Serial.println("Motion detected and notified!");
+ed!");
+tified!");
     }
     
     http.end();
