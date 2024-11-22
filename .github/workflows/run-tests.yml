@@ -6,12 +6,13 @@ on:
   pull_request:
     branches: [ master, main ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   backend-tests:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./CameraBackend.Api
     steps:
       - uses: actions/checkout@v3
       
@@ -21,19 +22,16 @@ jobs:
           dotnet-version: '8.0.401'
           
       - name: Restore dependencies
-        run: |
-          cd ..
-          dotnet restore
+        run: dotnet restore
+        working-directory: ./CameraBackend.Api
         
       - name: Build
-        run: |
-          cd ..
-          dotnet build --no-restore
+        run: dotnet build --no-restore
+        working-directory: ./CameraBackend.Api
         
       - name: Test .NET
-        run: |
-          cd ..
-          dotnet test --no-build --verbosity normal
+        run: dotnet test --no-build --verbosity normal
+        working-directory: ./CameraBackend.Api.Tests
 
   frontend-tests:
     runs-on: ubuntu-latest
@@ -54,10 +52,27 @@ jobs:
         run: npm ci
         
       - name: Run linting
-        run: npm run lint
+        run: npm run lint --max-warnings 0
         
       - name: Test Next.js and React
         run: npm test -- --passWithNoTests
+
+  build:
+    needs: [backend-tests, frontend-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Backend Build
+        run: |
+          dotnet restore
+          dotnet build --configuration Release
+        working-directory: ./CameraBackend.Api
         
+      - name: Frontend Build
+        run: |
+          npm ci
+          npm run build
+        working-directory: ./camera-frontend  
       - name: Build
         run: npm run build
