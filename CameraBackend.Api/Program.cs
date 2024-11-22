@@ -15,11 +15,21 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddScoped<SessionService>();
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
+// Configure WebSocket
+var webSocketOptions = new WebSocketOptions
+{
+    KeepAliveInterval = TimeSpan.FromMinutes(2)
+};
+app.UseWebSockets(webSocketOptions);
+
 // Use CORS policy
 app.UseCors("NextJsPolicy");
+
+app.MapControllers();
 
 app.MapGet("/hello", () => Results.Json(new { message = "Hello from the .NET API!" }));
 
