@@ -22,8 +22,8 @@ jobs:
           dotnet-version: '8.0.401'
           
       - name: Restore dependencies
-        run: dotnet restore
-        working-directory: ./CameraBackend.Api
+        run: dotnet restore CameraBackend.sln
+        working-directory: .
         
       - name: Build
         run: dotnet build --no-restore
@@ -52,7 +52,9 @@ jobs:
         run: npm ci
         
       - name: Run linting
-        run: npm run lint --max-warnings 0
+        run: npm run lint
+        env:
+          NEXT_LINT_ARGS: "--max-warnings 0"
         
       - name: Test Next.js and React
         run: npm test -- --passWithNoTests
@@ -65,14 +67,14 @@ jobs:
       
       - name: Backend Build
         run: |
-          dotnet restore
+          dotnet restore CameraBackend.sln
           dotnet build --configuration Release
-        working-directory: ./CameraBackend.Api
+        working-directory: .
         
       - name: Frontend Build
         run: |
           npm ci
           npm run build
-        working-directory: ./camera-frontend  
+        working-directory: ./camera-frontend
       - name: Build
         run: npm run build
