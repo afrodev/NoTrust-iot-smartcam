@@ -22,16 +22,13 @@ jobs:
           dotnet-version: '8.0.401'
           
       - name: Restore dependencies
-        run: dotnet restore CameraBackend.sln
-        working-directory: .
+        run: dotnet restore
         
-      - name: Build
+      - name: Build solution
         run: dotnet build --no-restore
-        working-directory: ./CameraBackend.Api
         
       - name: Test .NET
         run: dotnet test --no-build --verbosity normal
-        working-directory: ./CameraBackend.Api.Tests
 
   frontend-tests:
     runs-on: ubuntu-latest
@@ -65,16 +62,18 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.401'
+      
       - name: Backend Build
         run: |
-          dotnet restore CameraBackend.sln
+          dotnet restore
           dotnet build --configuration Release
-        working-directory: .
         
       - name: Frontend Build
         run: |
           npm ci
           npm run build
         working-directory: ./camera-frontend
-      - name: Build
-        run: npm run build
