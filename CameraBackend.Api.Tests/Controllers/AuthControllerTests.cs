@@ -3,42 +3,59 @@ using CameraBackend.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
 
-namespace CameraBackend.Api.Tests.Controllers
+namespace CameraBackend.Api.Tests.Controllers;
+
+public class AuthControllerTests
 {
-    public class AuthControllerTests
+    private readonly AuthController _controller;
+    private readonly SessionService _sessionService;
+
+    public AuthControllerTests()
     {
-        private readonly SessionService _sessionService;
-        private readonly AuthController _controller;
+        _sessionService = new SessionService();
+        _controller = new AuthController(_sessionService);
+    }
 
-        public AuthControllerTests()
-        {
-            _sessionService = new SessionService();
-            _controller = new AuthController(_sessionService);
-        }
+    [Fact]
+    public void SignIn_ShouldReturnOkResult()
+    {
+        // Act
+        var result = _controller.SignIn();
 
-        [Fact]
-        public void SignIn_ShouldAuthenticateAndReturnOk()
-        {
-            // Act
-            var result = _controller.SignIn();
+        // Assert
+        Assert.IsType<OkResult>(result);
+    }
 
-            // Assert
-            Assert.IsType<OkResult>(result);
-            Assert.True(_sessionService.IsAuthenticated);
-        }
+    [Fact]
+    public void SignIn_ShouldSetIsAuthenticatedToTrue()
+    {
+        // Act
+        _controller.SignIn();
 
-        [Fact]
-        public void SignOut_ShouldDeauthenticateAndReturnOk()
-        {
-            // Arrange
-            _sessionService.IsAuthenticated = true;
+        // Assert
+        Assert.True(_sessionService.IsAuthenticated);
+    }
 
-            // Act
-            var result = _controller.SignOut();
+    [Fact]
+    public void SignOut_ShouldReturnOkResult()
+    {
+        // Act
+        var result = _controller.SignOut();
 
-            // Assert
-            Assert.IsType<OkResult>(result);
-            Assert.False(_sessionService.IsAuthenticated);
-        }
+        // Assert
+        Assert.IsType<OkResult>(result);
+    }
+
+    [Fact]
+    public void SignOut_ShouldSetIsAuthenticatedToFalse()
+    {
+        // Arrange
+        _sessionService.IsAuthenticated = true;
+
+        // Act
+        _controller.SignOut();
+
+        // Assert
+        Assert.False(_sessionService.IsAuthenticated);
     }
 }
